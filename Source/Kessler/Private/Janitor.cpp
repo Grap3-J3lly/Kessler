@@ -18,6 +18,8 @@ AJanitor::AJanitor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	Capsule->SetCapsuleHalfHeight(100.f);
+	Capsule->SetCapsuleRadius(50.f);
 	SetRootComponent(Capsule);
 
 	JanitorMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("JanitorMesh"));
@@ -28,6 +30,8 @@ AJanitor::AJanitor()
 	
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
+
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 void AJanitor::Tick(float DeltaTime)

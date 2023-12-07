@@ -4,13 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "InputActionValue.h"
 #include "Janitor.generated.h"
 
 // Forward Declarations
+class UCameraComponent;
 class UCapsuleComponent;
+class UInputAction;
+class UInputMappingContext;
 class USkeletalMeshComponent;
 class USpringArmComponent;
-class UCameraComponent;
 
 UCLASS()
 class KESSLER_API AJanitor : public APawn
@@ -22,13 +25,26 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* Capsule;
+
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputMappingContext* JanitorMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LookAction;
+
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
 private:
 	
-	UPROPERTY(VisibleAnywhere)
-	UCapsuleComponent* Capsule;
 
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* JanitorMesh;

@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -	//
@@ -40,7 +41,7 @@ AJanitor::AJanitor()
 void AJanitor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	DelayCharacterRotation(DeltaTime);
 }
 
 void AJanitor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -51,6 +52,9 @@ void AJanitor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AJanitor::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AJanitor::Look);
+
+		EnhancedInputComponent->BindAction(BrakeAction, ETriggerEvent::Triggered, this, &AJanitor::Brake);
+		EnhancedInputComponent->BindAction(BrakeAction, ETriggerEvent::Completed, this, &AJanitor::Brake);
 	}
 	
 }
@@ -71,7 +75,8 @@ void AJanitor::BeginPlay()
 		}
 	}
 
-
+	PreviousRotation = GetActorRotation();
+	OriginalDeceleration = Cast<UFloatingPawnMovement>(GetMovementComponent())->Deceleration;
 }
 
 void AJanitor::Move(const FInputActionValue& Value)
@@ -108,6 +113,42 @@ void AJanitor::Look(const FInputActionValue& Value)
 		{
 			AddControllerRollInput(LookAxisValue.Z);
 		}
+	}
+}
+
+void AJanitor::Brake(const FInputActionValue& Value)
+{
+	const bool IsBraking = Value.Get<bool>();
+	UFloatingPawnMovement* FloatingPawnMovement = Cast<UFloatingPawnMovement>(GetMovementComponent());
+
+	if (IsBraking)
+	{
+		FloatingPawnMovement->Deceleration = BrakeDeceleration;
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Green, FString("Deceleration is On"));
+		}
+	}
+	else
+	{
+		FloatingPawnMovement->Deceleration = OriginalDeceleration;
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, FString("Deceleration is Off"));
+		}
+	}
+}
+
+void AJanitor::DelayCharacterRotation(float DeltaTime)
+{
+	FRotator CurrentRotation = GetControlRotation();
+	if (PreviousRotation != CurrentRotation)
+	{
+		FRotator NewRotator = FMath::RInterpTo(PreviousRotation, CurrentRotation, DeltaTime, InterpSpeed);
+		SetActorRotation(NewRotator);
+		PreviousRotation = NewRotator;
 	}
 }
 

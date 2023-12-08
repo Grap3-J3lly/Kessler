@@ -40,12 +40,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* BrakeAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float InterpSpeed = .5f;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float BrakeDeceleration = .5f;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Brake(const FInputActionValue& Value);
+
 
 private:
 	
-
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* JanitorMesh;
 
@@ -54,5 +64,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
+
+	UPROPERTY(VisibleAnywhere)
+	FRotator PreviousRotation;
+
+	UPROPERTY()
+	float OriginalDeceleration = 0.f;
+
+	UFUNCTION()
+	void DelayCharacterRotation(float DeltaTime);
 
 };
